@@ -1,0 +1,104 @@
+{
+  "generated": "2026-11-01T07:00:54",
+  "platform": "GoHighLevel",
+  "summary": {
+    "passed": 8,
+    "total": 8,
+    "extra_passed": 3,
+    "extra_total": 3,
+    "demo_records": {
+      "contacts": 5,
+      "opportunities": 4
+    }
+  },
+  "rows": [
+    {
+      "id": "T1",
+      "title": "Qualified form inquiry",
+      "pass": true,
+      "observed": "action=created; tier=qualified; stage=New – qualified; follow-up task=True; draft=approved; edited=True",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T2",
+      "title": "Same person follows up by email",
+      "pass": true,
+      "observed": "action=updated; same contact as T1=True; form + email inquiries on Dana=2; final tier=qualified; same opportunity=True; second task=False; draft=approved; edited=False",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T3",
+      "title": "Same form submission sent twice",
+      "pass": true,
+      "observed": "action=duplicate_submission; same contact as T1=True; drafts for this submission=1",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T4",
+      "title": "Sales pitch by email",
+      "pass": true,
+      "observed": "action=created; tier=not_qualified; opportunities=0; draft=none",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T5",
+      "title": "Vague price question",
+      "pass": true,
+      "observed": "action=created; tier=needs_review; stage=Needs review; draft=rejected; sent=None",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T6",
+      "title": "No email and no phone",
+      "pass": true,
+      "observed": "HTTP status=400; Slack alert=1; GoHighLevel contact=None",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T7",
+      "title": "OpenAI returns an error",
+      "pass": true,
+      "observed": "action=created; tier=needs_review; stage=Needs review; llm_ok=False; draft=none; Slack alert=1",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T8",
+      "title": "Human review: edit + approve, approve, reject",
+      "pass": true,
+      "observed": "incomplete review refused=422; T1 reply sent to demo inbox=<demo inbox>; T1 reviewer=Morgan Lee (Ops); emails with the edited T1 text=1; T5 nothing sent=None; replies in demo inbox=2",
+      "problems": [],
+      "extra": false
+    },
+    {
+      "id": "T9",
+      "title": "Same person comes back through a Facebook lead form",
+      "pass": true,
+      "observed": "action=updated; same contact as T1=True; contacts with Dana's email=1; inquiry notes on Dana=3; opportunities on Dana=1; tasks on Dana=1; draft=rejected",
+      "problems": [],
+      "extra": true
+    },
+    {
+      "id": "T10",
+      "title": "New lead through a Facebook lead form",
+      "pass": true,
+      "observed": "action=created; source=Facebook lead form; tier=qualified; stage=New – qualified; tasks=1; draft=rejected",
+      "problems": [],
+      "extra": true
+    },
+    {
+      "id": "T11",
+      "title": "Meta delivers the same lead again",
+      "pass": true,
+      "observed": "action=duplicate_submission; same contact as T10=True; inquiry notes on Elena=1",
+      "problems": [],
+      "extra": true
+    }
+  ]
+}

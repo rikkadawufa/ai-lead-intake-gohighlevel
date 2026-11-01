@@ -1,0 +1,51 @@
+name: lead-intake-ghl-demo
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:-stable}
+    restart: unless-stopped
+    ports:
+      # 5678–5680 are taken by the UAT, HubSpot and Salesforce demos; this one runs side by side on 5681.
+      - "127.0.0.1:5681:5678"
+    environment:
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE:-Asia/Taipei}
+      - TZ=${GENERIC_TIMEZONE:-Asia/Taipei}
+      - WEBHOOK_URL=http://localhost:5681/
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - NODE_FUNCTION_ALLOW_BUILTIN=fs,path,crypto
+      - LLM_MODE=${LLM_MODE:-mock}
+      - OPENAI_MODEL=${OPENAI_MODEL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - GMAIL_ADDRESS=${GMAIL_ADDRESS}
+      - REPLY_REDIRECT_TO=${REPLY_REDIRECT_TO}
+      - DEMO_MODE=${DEMO_MODE:-1}
+      # http://mock:5690 for mock runs (docker compose --profile mock up -d), the real APIs otherwise.
+      - GHL_BASE_URL=${GHL_BASE_URL:-https://services.leadconnectorhq.com}
+      - GHL_LOCATION_ID=${GHL_LOCATION_ID}
+      - META_GRAPH_URL=${META_GRAPH_URL:-https://graph.facebook.com}
+      # The webhook signature is checked in a Code node, so the app secret has to be an env var here.
+      # The GoHighLevel token and the Meta Page token stay in n8n credentials (scripts/n8n_setup.py).
+      - META_APP_SECRET=${META_APP_SECRET}
+      - META_VERIFY_TOKEN=${META_VERIFY_TOKEN}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./sample-data:/files/sample-data:ro
+      - ./prompts:/files/prompts:ro
+      - ./workflows:/files/workflows:ro
+      - ./output:/files/output
+
+  # Local stand-in for GoHighLevel and the Graph lead endpoint, for runs before the trial account exists.
+  mock:
+    profiles: ["mock"]
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:-stable}
+    entrypoint: ["node", "/mock/mock_platforms.mjs"]
+    environment:
+      - GHL_LOCATION_ID=${GHL_LOCATION_ID}
+    ports:
+      - "127.0.0.1:5690:5690"
+    volumes:
+      - ./scripts/mock_platforms.mjs:/mock/mock_platforms.mjs:ro
+
+volumes:
+  n8n_data:
