@@ -54,6 +54,7 @@ Copy `.env.example` to `.env` and fill it in. Never commit `.env`; it's in `.git
 | `OPENAI_API_KEY` | https://platform.openai.com/api-keys. A restricted key with only Chat completions allowed is enough. |
 | `OPENAI_MODEL` | `gpt-4.1-mini` was used for testing |
 | `LLM_MODE` | `mock` (default), `live`, or `off` for intake only: no sorting, no AI fields, no pipeline, task or draft (see OPERATIONS "Running without AI") |
+| `DRAFT_MODE` | `on` (default) or `off` to sort leads without drafting replies: no review page and no review link in Slack (see OPERATIONS "Sorting without reply drafts") |
 | `DEMO_MODE` | `1` keeps everything inside the demo: only `@example.com` / `@example.org` senders (or phone-only inquiries from the fictional 555-0100 to 555-0199 range) reach GoHighLevel, and approved replies go to `REPLY_REDIRECT_TO` |
 | `REPLY_REDIRECT_TO` | Where approved replies go in demo mode, for example `yourdemo+replies@gmail.com` |
 | `GENERIC_TIMEZONE` | n8n's own time zone, for example `America/Los_Angeles`. Task due dates use the GoHighLevel location's time zone, not this one |

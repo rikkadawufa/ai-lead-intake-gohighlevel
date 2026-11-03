@@ -90,6 +90,14 @@ test('LLM_MODE=off skips the stored answers, sorts nothing and raises no AI aler
   assert.match(code('Plan opportunity'), /\(ctx\.qualification\.topic \|\| 'inquiry'\)/);
 });
 
+test('DRAFT_MODE=off sorts as usual but never drafts a reply', () => {
+  const process = workflows.find((item) => item.id === 'wfProcessInquiry');
+  const gate = process.nodes.find((node) => node.name === 'Draft a reply?');
+  assert.match(JSON.stringify(gate.parameters), /\$env\.DRAFT_MODE !== 'off' && \$json\.qualification\.llm_ok/);
+  // Every way to a draft goes through that gate.
+  assert.deepEqual(Object.entries(process.connections).filter(([, out]) => JSON.stringify(out).includes('"Build draft request"')).map(([name]) => name), ['Draft a reply?']);
+});
+
 test('only the reply node sends email, and it uses the redirect-aware fields', () => {
   const process = workflows.find((item) => item.id === 'wfProcessInquiry');
   const senders = process.nodes.filter((node) => node.type === 'n8n-nodes-base.emailSend');

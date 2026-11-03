@@ -105,3 +105,20 @@ Offline checks after the change: 64 node tests (two new: the contact write, note
 | Slack | Only the T6 alert |
 
 Not covered: an email or Facebook source with AI off, phone matching, and a real CRM. After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.
+
+## Sorting without drafts, DRAFT_MODE=off (mock, 2026-11-04)
+Offline checks after the change: 65 node tests (one new: the `Draft a reply?` gate reads the mode and is the only way to `Build draft request`) and the 24 Python tests pass. Then against the local mocks with `LLM_MODE=mock`, `DRAFT_MODE=off` and no Gmail: `send_fixtures.py --only T1,T3,T5,T6,T7`. n8n ran on port 5683 for this round (5681 was taken by the feed-sync demo), through a temporary compose override and a temporary `N8N_URL` change, both undone afterwards. Output kept in `output/archive-mock-standard-1/` (run logs plus the mock's final state).
+
+| Check | Result |
+|---|---|
+| T1 | Created, Qualified, opportunity in `New – qualified`, call task, no draft |
+| T3 | Stopped as a repeat |
+| T5 | Created, Needs review, opportunity in `Needs review`, no task, no draft |
+| T6 | 400, one Slack alert ("Inquiry not accepted (no_contact)") |
+| T7 | Created, Needs review with `llm_ok=false`, one Slack alert ("AI classification failed") |
+| Contacts | 3, each with all six custom fields filled |
+| Notes | 3, each with the AI line |
+| Opportunities, tasks, review pages | 3, 1, 0 |
+| Slack | Only the T6 and T7 alerts, no "New lead ... review the draft reply" message |
+
+Not covered: the email sources (T2, T4), a live OpenAI run, a real CRM, and a rerun with `DRAFT_MODE` unset (the default path is the same gate with the mode check true, and the earlier rounds cover it).

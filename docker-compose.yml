@@ -15,6 +15,7 @@ services:
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
       - NODE_FUNCTION_ALLOW_BUILTIN=fs,path,crypto
       - LLM_MODE=${LLM_MODE:-mock}
+      - DRAFT_MODE=${DRAFT_MODE:-on}
       - OPENAI_MODEL=${OPENAI_MODEL}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
       - GMAIL_ADDRESS=${GMAIL_ADDRESS}

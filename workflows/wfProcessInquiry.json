@@ -959,7 +959,7 @@
           "conditions": [
             {
               "id": "draft-a-reply-condition",
-              "leftValue": "={{ $json.qualification.llm_ok && $json.qualification.tier !== 'not_qualified' }}",
+              "leftValue": "={{ $env.DRAFT_MODE !== 'off' && $json.qualification.llm_ok && $json.qualification.tier !== 'not_qualified' }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",

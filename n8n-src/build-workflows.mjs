@@ -320,7 +320,7 @@ if ($('Create follow-up task').isExecuted) {
 }
 const { plan, task, ...rest } = ctx;
 return [{ json: { ...rest, taskId } }];`), 6800, 200),
-    at(ifNode('Draft a reply?', "={{ $json.qualification.llm_ok && $json.qualification.tier !== 'not_qualified' }}", isTrue), 7020, 200),
+    at(ifNode('Draft a reply?', "={{ $env.DRAFT_MODE !== 'off' && $json.qualification.llm_ok && $json.qualification.tier !== 'not_qualified' }}", isTrue), 7020, 200),
     at(code('Log without draft', `${source('records', 'ghl')}
 
 const ctx = $input.first().json;

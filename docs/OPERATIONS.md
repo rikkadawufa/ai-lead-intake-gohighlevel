@@ -47,6 +47,10 @@ Test a rule change in mock mode first, then do one live run (see SETUP §8). In 
 
 `LLM_MODE=off` keeps only the intake: each inquiry is still matched by email, then phone, repeats are still stopped, empty name, email and phone fields are still filled, and the message is still saved as a note. Nothing goes to OpenAI. Only Inquiry Source and Inquiry Source IDs are written; Lead Tier, Topic, Urgency and AI Reason are left as they are, the note has no AI line, and no opportunity, task, draft or AI alert is made. An OpenAI key isn't used in this mode. Recreate the container after changing it (`docker compose up -d --force-recreate n8n`).
 
+## Sorting without reply drafts
+
+`DRAFT_MODE=off` keeps the AI sorting and stops before the reply step: the AI fields, the note's AI line, the pipeline stage, the call task and the AI failure alert all work as usual, but no draft is written, no review page is made and Slack gets no review link, only the alerts. Leave `LLM_MODE` on `live` (or `mock`); with `LLM_MODE=off` there is nothing to draft anyway. Recreate the container after changing it (`docker compose up -d --force-recreate n8n`).
+
 ## Changing what each tier does in the pipeline
 
 The tier-to-stage rules and the task wording are in `n8n-src/code/ghl.js` (`STAGES`, `planOpportunity`, `followUpTask`). To rename a stage, rename it in GoHighLevel, change the name in `STAGES` and in `scripts/ghl_setup.py`, run `ghl_setup.py` to refresh `output/ghl-ids.json`, then run the tests, rebuild and re-import. The workflows find stages by the ids in that file, so renaming in GoHighLevel alone breaks nothing until the next setup run.
