@@ -87,4 +87,6 @@ Run against the local mocks with `LLM_MODE=mock`, no Gmail (so nothing could be 
 | Form post with login, no name | 422 (as in T8) |
 | Form post with login, complete | 200; T1 and T5 rejected by "Morgan Lee (Ops)", nothing sent |
 
-Not covered: a person using the page in a browser (the page and the form are on different paths; both answer with the same realm, so the browser should reuse the login, but that wasn't tried), and a live run on GoHighLevel. After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.
+By hand in a browser (mock, 2026-11-04, a fresh T1 review): opening the review link asked for the login; after signing in, the page showed, and submitting a reject with a reviewer name went through without asking for the login again (the page and the form are on different paths but answer with the same realm). The run log shows the draft rejected by the name typed and nothing sent. Output kept in `output/archive-mock-auth-2/`. The browser pane built into the Claude desktop app shows only "Authorization is required!" and no login box, so use a regular browser.
+
+Not covered: a live run on GoHighLevel, and approving (this mock run had no Gmail, so only rejects were tried). After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.
