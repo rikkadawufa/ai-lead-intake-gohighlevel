@@ -13,6 +13,8 @@ const CREDS = {
   openai: { httpHeaderAuth: { id: 'openAiCred01', name: 'OpenAI' } },
   imap: { imap: { id: 'gmailImapCred01', name: 'Gmail IMAP (demo inbox)' } },
   smtp: { smtp: { id: 'gmailSmtpCred01', name: 'Gmail SMTP (demo inbox)' } },
+  // One login for both review URLs: the page (GET /webhook/review) and the form post (the Wait node's resume URL).
+  review: { httpBasicAuth: { id: 'reviewLoginCred01', name: 'Review page login' } },
 };
 
 const id = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -356,7 +358,7 @@ fs.writeFileSync('/files/output/review/' + reviewId + '.json', JSON.stringify({ 
 const reviewUrl = ($env.WEBHOOK_URL || 'http://localhost:5681/') + 'webhook/review?id=' + encodeURIComponent(reviewId);
 return [{ json: { ...ctx, reviewId, reviewUrl, slackText: reviewAlert(ctx.inquiry, ctx.qualification, reviewUrl) } }];`), 8340, 0),
     at(slack('Notify reviewer', '$json.slackText'), 8560, 0),
-    at({ id: 'wait-for-review', name: 'Wait for review', type: 'n8n-nodes-base.wait', typeVersion: 1.1, position: [0, 0], webhookId: stableUuid('wait-for-review'), parameters: { resume: 'webhook', httpMethod: 'POST', responseMode: 'responseNode', limitWaitTime: true, limitType: 'afterTimeInterval', resumeAmount: 72, resumeUnit: 'hours', options: {} } }, 8780, 0),
+    at({ id: 'wait-for-review', name: 'Wait for review', type: 'n8n-nodes-base.wait', typeVersion: 1.1, position: [0, 0], webhookId: stableUuid('wait-for-review'), credentials: CREDS.review, parameters: { resume: 'webhook', incomingAuthentication: 'basicAuth', httpMethod: 'POST', responseMode: 'responseNode', limitWaitTime: true, limitType: 'afterTimeInterval', resumeAmount: 72, resumeUnit: 'hours', options: {} } }, 8780, 0),
     at(code('Read decision', `${source('review')}
 
 const ctx = $('Build review page').first().json;
@@ -524,9 +526,10 @@ return ${runLogShape("{ inquiry: { source: 'meta_lead', source_id: 'meta:refused
 }
 
 function reviewPageServer() {
+  const open = webhook('Open review page', 'review', 'GET');
   const nodes = [
-    note('About', '## Review page\n`GET /webhook/review?id=…` serves the saved review page so the Slack link opens in the browser.', -80, -60, 700, 140, 7),
-    at(webhook('Open review page', 'review', 'GET'), 0, 200),
+    note('About', '## Review page\n`GET /webhook/review?id=…` serves the saved review page so the Slack link opens in the browser. Both this page and the form it posts to need the review login (basic auth).', -80, -60, 700, 140, 7),
+    at({ ...open, credentials: CREDS.review, parameters: { ...open.parameters, authentication: 'basicAuth' } }, 0, 200),
     at(code('Load review page', `const fs = require('fs');
 const id = String(($input.first().json.query || {}).id || '');
 const file = '/files/output/review/' + id + '.html';

@@ -99,7 +99,7 @@ How the Facebook leads were tested: T9 and T10 were created on the real Instant 
 - AI Reason describes the latest message, while Lead Tier keeps the highest tier. After T2, Dana is Qualified, but the reason field explains the follow-up on its own.
 - Meta lead notifications were sent by the test script, not by Meta (see above). A real setup should confirm Meta delivers them, which most likely means a Live-mode app.
 - Repeat detection reads the contact first and writes after. That catches resends, retries and replays, but two copies of the same inquiry arriving within the same second could both get through.
-- The review page is served by n8n on localhost, and the reviewer types their name; there's no sign-in. A team setup would need n8n on a reachable host with access control in front of it.
+- The review page is served by n8n on localhost. The page and its form ask for one shared basic-auth login (checked in a mock run, not yet by hand in a browser or against GoHighLevel), and the reviewer types their name, so the name isn't tied to an account. A team setup would need n8n on a reachable host over HTTPS.
 - Tested on one GoHighLevel trial sub-account with a Private Integration token. Not tested with the Marketplace OAuth app flow, agency-level access across several sub-accounts, or GoHighLevel's own workflows and forms.
 
 ## Not included
@@ -110,7 +110,7 @@ WhatsApp, Instagram DMs, Instagram lead ads (same form type, not tested), an aut
 
 This repo runs a demo for a made-up company on localhost. Putting it to work for a real team takes more:
 
-- Hosting n8n somewhere reachable, with sign-in in front of the review page
+- Hosting n8n somewhere reachable over HTTPS, so the review login isn't sent in the clear
 - Setting up the fields, pipeline and Private Integration in your sub-account, plus keys and an alert channel
 - Getting Meta to deliver lead webhooks for your Pages, which means a Live-mode app and, for Pages you don't own, Meta's App Review
 - Fitting it to how your account already works: existing pipelines, tags, GoHighLevel workflows that react to new contacts

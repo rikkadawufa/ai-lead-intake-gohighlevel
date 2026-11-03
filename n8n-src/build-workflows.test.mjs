@@ -72,6 +72,15 @@ test('a repeat submission stops before the AI call and GoHighLevel writes', () =
   assert.equal(saved[0].node, 'Contact saved');
 });
 
+test('the review page and the form it posts to both ask for the review login', () => {
+  const page = workflows.find((item) => item.id === 'wfReviewPage').nodes.find((node) => node.name === 'Open review page');
+  const wait = workflows.find((item) => item.id === 'wfProcessInquiry').nodes.find((node) => node.name === 'Wait for review');
+  assert.equal(page.parameters.authentication, 'basicAuth');
+  assert.equal(wait.parameters.incomingAuthentication, 'basicAuth');
+  assert.equal(page.credentials.httpBasicAuth.id, 'reviewLoginCred01');
+  assert.equal(wait.credentials.httpBasicAuth.id, 'reviewLoginCred01');
+});
+
 test('only the reply node sends email, and it uses the redirect-aware fields', () => {
   const process = workflows.find((item) => item.id === 'wfProcessInquiry');
   const senders = process.nodes.filter((node) => node.type === 'n8n-nodes-base.emailSend');

@@ -26,6 +26,9 @@ def credentials(values):
          "data": {"name": "access_token", "value": require(values, "META_PAGE_TOKEN")}},
         {"id": "openAiCred01", "name": "OpenAI", "type": "httpHeaderAuth",
          "data": {"name": "Authorization", "value": f"Bearer {require(values, 'OPENAI_API_KEY')}"}},
+        # The review page and its form post are public webhooks once n8n is reachable, so both ask for this login.
+        {"id": "reviewLoginCred01", "name": "Review page login", "type": "httpBasicAuth",
+         "data": {"user": require(values, "REVIEW_USER"), "password": require(values, "REVIEW_PASSWORD")}},
     ]
     # A mock run can go without Gmail: the email intake is then not published and nothing can be sent.
     if values.get("GMAIL_ADDRESS"):

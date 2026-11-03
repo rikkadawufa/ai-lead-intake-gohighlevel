@@ -50,6 +50,7 @@ Copy `.env.example` to `.env` and fill it in. Never commit `.env`; it's in `.git
 | `GMAIL_ADDRESS` | The demo inbox. Leave empty to run without the email source |
 | `GMAIL_APP_PASSWORD` | https://myaccount.google.com/apppasswords (needs 2-Step Verification). Spaces are fine. |
 | `SLACK_WEBHOOK_URL` | https://api.slack.com/apps → your app → Incoming Webhooks → add one for the alerts channel |
+| `REVIEW_USER`, `REVIEW_PASSWORD` | The login for the review page and its form (basic auth). Pick a long random password; reviewers share it, and the Slack link alone no longer opens the page |
 | `OPENAI_API_KEY` | https://platform.openai.com/api-keys. A restricted key with only Chat completions allowed is enough. |
 | `OPENAI_MODEL` | `gpt-4.1-mini` was used for testing |
 | `LLM_MODE` | `mock` (default) or `live` |

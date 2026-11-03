@@ -78,7 +78,7 @@ Stages (by name, ids resolved at setup): `New – qualified`, `Needs review`, `C
 
 ## 7. n8n environment
 ### 7.1 Image `2.44.7`, port 5681, `WEBHOOK_URL` = the tunnel URL on live days, `http://localhost:5681/` otherwise.
-### 7.2 Credentials (fixed ids, imported by `n8n_setup.py`): `ghlTokenCred01` (httpHeaderAuth `Authorization: Bearer …`), `openAiCred01`, `gmailImapCred01`, `gmailSmtpCred01`. Meta page token and app secret are env vars read only inside the Meta nodes.
+### 7.2 Credentials (fixed ids, imported by `n8n_setup.py`): `ghlTokenCred01` (httpHeaderAuth `Authorization: Bearer …`), `openAiCred01`, `gmailImapCred01`, `gmailSmtpCred01`, `reviewLoginCred01` (httpBasicAuth from `REVIEW_USER` / `REVIEW_PASSWORD`, on the review page webhook and the Wait node's resume webhook). Meta page token and app secret are env vars read only inside the Meta nodes.
 ### 7.3 Mock run: `docker compose --profile mock up -d` starts the mock; `.env` sets `GHL_BASE_URL` and `META_GRAPH_URL` to `http://mock:5690` (n8n reaches it inside Docker; host scripts translate that to `http://localhost:5690`) and `SLACK_WEBHOOK_URL` to `http://mock:5690/__slack`. Meta webhooks are posted by `send_fixtures.py` with a correctly signed body. Without `GMAIL_ADDRESS`, `n8n_setup.py` skips the Gmail credentials and the email intake, and `send_fixtures.py --review --reject-all` rejects every draft, so a mock run can't send email.
 
 ## 8. Workflows and scripts

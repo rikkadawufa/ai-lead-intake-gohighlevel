@@ -72,3 +72,19 @@ Everything real: GoHighLevel, Meta (test leads on the real form, read from Graph
 | Side by side | T1–T8: HubSpot 8/8, Salesforce 8/8, GoHighLevel 8/8 |
 
 The trial account also holds 4 sample contacts that came with it (2 without email, `alex.carter@businessmail.com`, `riley.bennett@corporate.net`); the demo didn't touch them. The demo data from this round is left in GoHighLevel for screenshots.
+
+## Review page login (mock, 2026-11-04)
+The review page (`GET /webhook/review`) and the form it posts to (the Wait node's resume URL) now both need the review login, an n8n basic-auth credential built from `REVIEW_USER` and `REVIEW_PASSWORD`. Offline checks after the change: 62 node tests and 24 Python tests pass, including a new builder test that both nodes use the credential.
+
+Run against the local mocks with `LLM_MODE=mock`, no Gmail (so nothing could be sent) and the form fixtures only: `send_fixtures.py --only T1,T3,T5,T6,T7`, then `--review --reject-all`. Output kept in `output/archive-mock-auth-1/`.
+
+| Check | Result |
+|---|---|
+| Intake unchanged | T1 created, T3 repeat, T5 created, T6 400, T7 created with no draft (forced AI error) |
+| Review page without login | 401, with `WWW-Authenticate: Basic realm="Webhook"` |
+| Review page with login | 200 |
+| Form post without login | 401; the execution kept waiting |
+| Form post with login, no name | 422 (as in T8) |
+| Form post with login, complete | 200; T1 and T5 rejected by "Morgan Lee (Ops)", nothing sent |
+
+Not covered: a person using the page in a browser (the page and the form are on different paths; both answer with the same realm, so the browser should reuse the login, but that wasn't tried), and a live run on GoHighLevel. After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.

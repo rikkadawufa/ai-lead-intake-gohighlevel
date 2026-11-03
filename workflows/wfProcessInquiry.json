@@ -1181,8 +1181,15 @@
         0
       ],
       "webhookId": "0a123234-f134-dafd-9cea-a8b6aa0f595e",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "reviewLoginCred01",
+          "name": "Review page login"
+        }
+      },
       "parameters": {
         "resume": "webhook",
+        "incomingAuthentication": "basicAuth",
         "httpMethod": "POST",
         "responseMode": "responseNode",
         "limitWaitTime": true,
