@@ -66,6 +66,21 @@ test('an existing contact keeps its identity, never drops from qualified, and ke
   assert.equal(values['f-ids'], 'form:tw-demo-0001\nemail:<t2@example.com>');
 });
 
+test('without AI sorting only the source fields are written, there is no tier, and the note has no AI line', () => {
+  const intakeOnly = { tier: null, topic: null, urgency: null, reason: null, llm_ok: false, llm_error: null, ai: false };
+  const created = contactRequest(inquiry, intakeOnly, null, ids, 'loc1');
+  assert.equal(created.tier, null);
+  assert.deepEqual(Object.fromEntries(created.body.customFields.map((item) => [item.id, item.field_value])), { 'f-src': 'email', 'f-ids': 'email:<t2@example.com>' });
+  // A contact that was Qualified before keeps its fields untouched, and this inquiry opens no pipeline work.
+  const updated = contactRequest(inquiry, intakeOnly, readContact(contactResponse(), ids), ids, 'loc1');
+  assert.equal(updated.tier, null);
+  assert.deepEqual(updated.body.customFields.map((item) => item.id), ['f-src', 'f-ids']);
+  assert.equal(planOpportunity({ tier: updated.tier, contactId: 'c1', label: 'Dana', topic: 'inquiry', existing: null, ids, locationId: 'loc1' }).request, null);
+  const note = inquiryNote(inquiry, intakeOnly).body;
+  assert.doesNotMatch(note, /AI/);
+  assert.match(note, /Is Tuesday possible\?\n\nSource id: email:<t2@example\.com>$/);
+});
+
 test('a create refused as a duplicate gives back the existing contact', () => {
   assert.equal(parseDuplicateCreate({ statusCode: 400, body: { statusCode: 400, message: 'This location does not allow duplicated contacts.', meta: { contactId: 'c9', matchingField: 'email' } } }), 'c9');
   assert.equal(parseDuplicateCreate({ statusCode: 400, body: { message: 'email is invalid' } }), null);

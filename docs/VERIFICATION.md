@@ -89,4 +89,19 @@ Run against the local mocks with `LLM_MODE=mock`, no Gmail (so nothing could be 
 
 By hand in a browser (mock, 2026-11-04, a fresh T1 review): opening the review link asked for the login; after signing in, the page showed, and submitting a reject with a reviewer name went through without asking for the login again (the page and the form are on different paths but answer with the same realm). The run log shows the draft rejected by the name typed and nothing sent. Output kept in `output/archive-mock-auth-2/`. The browser pane built into the Claude desktop app shows only "Authorization is required!" and no login box, so use a regular browser.
 
-Not covered: a live run on GoHighLevel, and approving (this mock run had no Gmail, so only rejects were tried). After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.
+Not covered: a live run on GoHighLevel, and approving (this mock run had no Gmail, so only rejects were tried). The GoHighLevel trial account has since been closed; approving and sending with the login was checked on the HubSpot version instead (its VERIFICATION.md, "Review page login").
+
+## Intake only, LLM_MODE=off (mock, 2026-11-04)
+Offline checks after the change: 64 node tests (two new: the contact write, note and pipeline plan without AI; the workflow nodes that read the mode) and the Python tests pass. Then against the local mocks with `LLM_MODE=off` and no Gmail: `send_fixtures.py --only T1,T3,T5,T6,T7`. Output kept in `output/archive-mock-starter-1/`.
+
+| Check | Result |
+|---|---|
+| T1, T5, T7 | Created; tier empty, no draft, no alert. T7's forced AI error never comes into play because no AI call is made |
+| T3 | Stopped as a repeat |
+| T6 | 400, one Slack alert ("Inquiry not accepted (no_contact)") |
+| Contacts | 3, each with only Inquiry Source and Inquiry Source IDs among the custom fields |
+| Notes | The original message and source id, no AI line |
+| Opportunities, tasks, review pages | 0, 0, 0 |
+| Slack | Only the T6 alert |
+
+Not covered: an email or Facebook source with AI off, phone matching, and a real CRM. After this change the live setup needs `REVIEW_USER` and `REVIEW_PASSWORD` in `.env` and a new `python scripts/n8n_setup.py`.

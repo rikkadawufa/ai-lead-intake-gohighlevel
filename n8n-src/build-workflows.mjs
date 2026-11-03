@@ -199,6 +199,7 @@ function processInquiry() {
 
 const fs = require('fs');
 const ctx = $input.first().json;
+if ($env.LLM_MODE === 'off') return [{ json: {} }];
 const id = fixtureIdFor(ctx.inquiry.source_id, ${loadFixtures}, ctx.inquiry.email);
 const file = '/files/sample-data/mock-llm/' + id + '.${kind}.json';
 const content = id && fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
@@ -247,7 +248,7 @@ return [{ json: { ...ctx, request: buildQualifyRequest(ctx.inquiry, PROMPT) } }]
 
 ${loadIds}
 const ctx = $('Build qualify request').first().json;
-const qualification = qualificationFromLlm($input.first().json, ctx.inquiry.message);
+const qualification = $env.LLM_MODE === 'off' ? intakeOnlyQualification() : qualificationFromLlm($input.first().json, ctx.inquiry.message);
 const write = contactRequest(ctx.inquiry, qualification, ctx.contact, ids, $env.GHL_LOCATION_ID);
 return [{ json: { inquiry: ctx.inquiry, contact: ctx.contact, contactId: ctx.contactId, matchedBy: ctx.matchedBy, qualification, tier: write.tier, write } }];`), 2420, 200),
 
@@ -295,7 +296,7 @@ if (![200, 201].includes(noteRes.statusCode)) throw new Error('GoHighLevel add n
 const { note, opportunitySearch, ...ctx } = $('Prepare inquiry note').first().json;
 const existing = readOpenOpportunity($input.first().json, ids);
 const label = ctx.inquiry.name || ctx.inquiry.email || ctx.inquiry.phone;
-const plan = planOpportunity({ tier: ctx.tier, contactId: ctx.contactId, label, topic: ctx.qualification.topic.replace(/_/g, ' '), existing, ids, locationId: $env.GHL_LOCATION_ID });
+const plan = planOpportunity({ tier: ctx.tier, contactId: ctx.contactId, label, topic: (ctx.qualification.topic || 'inquiry').replace(/_/g, ' '), existing, ids, locationId: $env.GHL_LOCATION_ID });
 const task = plan.needsTask ? followUpTask(ctx.inquiry, ctx.qualification, { now: new Date().toISOString(), timeZone: ids.timezone }) : null;
 return [{ json: { ...ctx, plan, task, opportunityId: plan.opportunityId, stage: plan.stage } }];`), 5480, 200),
     at(ifNode('Change opportunity?', '={{ !!$json.plan.request }}', isTrue), 5700, 200),
@@ -323,7 +324,7 @@ return [{ json: { ...rest, taskId } }];`), 6800, 200),
     at(code('Log without draft', `${source('records', 'ghl')}
 
 const ctx = $input.first().json;
-const alerts = ctx.qualification.llm_ok ? [] : [llmFailureAlert(ctx.inquiry, ctx.qualification, ${link})];
+const alerts = ctx.qualification.llm_ok || ctx.qualification.ai === false ? [] : [llmFailureAlert(ctx.inquiry, ctx.qualification, ${link})];
 return ${runLogShape(`{ inquiry: ctx.inquiry, ${recordLog}, action: ctx.action, qualification: ctx.qualification, draft: 'none', alerts }`)};`), 7240, 420),
 
     at(code('Build draft request', `${source('llm')}

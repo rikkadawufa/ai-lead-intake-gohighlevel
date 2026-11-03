@@ -81,6 +81,15 @@ test('the review page and the form it posts to both ask for the review login', (
   assert.equal(wait.credentials.httpBasicAuth.id, 'reviewLoginCred01');
 });
 
+test('LLM_MODE=off skips the stored answers, sorts nothing and raises no AI alert', () => {
+  const process = workflows.find((item) => item.id === 'wfProcessInquiry');
+  const code = (name) => process.nodes.find((node) => node.name === name).parameters.jsCode;
+  assert.match(code('Load mock qualification'), /if \(\$env\.LLM_MODE === 'off'\) return \[\{ json: \{\} \}\];/);
+  assert.match(code('Apply qualification'), /\$env\.LLM_MODE === 'off' \? intakeOnlyQualification\(\)/);
+  assert.match(code('Log without draft'), /ctx\.qualification\.ai === false \? \[\]/);
+  assert.match(code('Plan opportunity'), /\(ctx\.qualification\.topic \|\| 'inquiry'\)/);
+});
+
 test('only the reply node sends email, and it uses the redirect-aware fields', () => {
   const process = workflows.find((item) => item.id === 'wfProcessInquiry');
   const senders = process.nodes.filter((node) => node.type === 'n8n-nodes-base.emailSend');

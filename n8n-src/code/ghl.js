@@ -80,16 +80,12 @@ function customFields(ids, values) {
 // PUT replaces tags, so tags are only sent on create.
 function contactRequest(inquiry, qualification, contact, ids, locationId) {
   const name = splitName(inquiry.name);
-  const tier = mergeTier(contact && contact.tier, qualification.tier);
+  // No tier without AI sorting, so the pipeline and task steps leave this inquiry alone.
+  const tier = qualification.ai === false ? null : mergeTier(contact && contact.tier, qualification.tier);
   const sourceIds = [...((contact && contact.sourceIds) || []), inquiry.source_id];
-  const fields = customFields(ids, {
-    lead_tier: tier,
-    inquiry_topic: qualification.topic,
-    inquiry_urgency: qualification.urgency,
-    inquiry_source: inquiry.source,
-    ai_reason: qualification.reason,
-    inquiry_source_ids: sourceIds.join('\n'),
-  });
+  // Without AI sorting (qualification.ai === false) only the source fields are written; the AI fields stay as they are.
+  const aiFields = qualification.ai === false ? {} : { lead_tier: tier, inquiry_topic: qualification.topic, inquiry_urgency: qualification.urgency, ai_reason: qualification.reason };
+  const fields = customFields(ids, { ...aiFields, inquiry_source: inquiry.source, inquiry_source_ids: sourceIds.join('\n') });
   if (!contact) {
     const body = { locationId, source: SOURCE_LABEL[inquiry.source] || inquiry.source, tags: [TAG], customFields: fields };
     if (name.first) body.firstName = name.first;
@@ -130,8 +126,8 @@ function oneLine(text, limit) {
 
 function inquiryNote(inquiry, qualification) {
   const header = [`Inquiry via ${SOURCE_LABEL[inquiry.source] || inquiry.source} at ${inquiry.received_at}`, ...(inquiry.subject ? [inquiry.subject] : [])];
-  const ai = `AI: ${qualification.tier} / ${qualification.topic} / ${qualification.urgency} — ${qualification.reason}`;
-  return { body: [...header, '', inquiry.message, '', ai, '', `Source id: ${inquiry.source_id}`].join('\n') };
+  const ai = qualification.ai === false ? [] : [`AI: ${qualification.tier} / ${qualification.topic} / ${qualification.urgency} — ${qualification.reason}`, ''];
+  return { body: [...header, '', inquiry.message, '', ...ai, `Source id: ${inquiry.source_id}`].join('\n') };
 }
 
 function decisionNote(result, { date, sentTo }) {
